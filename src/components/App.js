@@ -3,7 +3,41 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import Header from './Header/Header';
 import Products from './Products/Products';
+// import gql from 'graphql-tag';
 import Cart from './Cart/Cart';
+
+// import ApolloClient from 'apollo-client';
+import {
+  ApolloClient,
+  InMemoryCache,
+  gql
+} from "@apollo/client";
+import { HttpLink } from 'apollo-link-http';
+import { ApolloProvider } from 'react-apollo';
+
+const cache = new InMemoryCache();
+const client = new ApolloClient({
+  link: new HttpLink({
+    uri: 'http://localhost:4000/graphql',
+  }),
+  cache,
+  resolvers: {
+
+  },
+   typeDefs: `
+   extend type Query {
+   limit: Int!
+   }
+  `,
+});
+cache.writeQuery({
+  query: gql`
+  query Limit($limit: Int!) {
+    limit
+  }`,
+  data: { limit: 5 },
+});
+
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -22,7 +56,7 @@ const AppWrapper = styled.div`
 `;
 
 const App = () => (
-  <>
+  <ApolloProvider client={client}>
     <GlobalStyle />
     <AppWrapper>
       <Header />
@@ -31,7 +65,7 @@ const App = () => (
         <Route path='/cart' component={Cart} />
       </Switch>
     </AppWrapper>
-  </>
+  </ApolloProvider>
 );
 
 export default App;

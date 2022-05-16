@@ -1,4 +1,5 @@
 import React from 'react';
+import AddToCartButton from '../Cart/AddToCartButton';
 import styled from 'styled-components';
 
 const ProductItemWrapper = styled.div`
@@ -26,6 +27,7 @@ const ProductItem = ({ data }) => (
   <ProductItemWrapper>
     <Thumbnail src={data.thumbnail} width={200} />
     <Title>{data.title}</Title>
+    <AddToCartButton productId={data.id} />
   </ProductItemWrapper>
 );
 

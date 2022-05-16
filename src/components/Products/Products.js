@@ -1,7 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import SubHeader from '../Header/SubHeader';
+import { Query } from 'react-apollo';
+import { GET_PRODUCTS, GET_LIMIT } from '../../constants';
 import ProductItem from './ProductItem';
+import Filters from './Filter';
+
+
 
 const ProductItemsWrapper = styled.div`
   display: flex;
@@ -16,35 +21,45 @@ const Alert = styled.span`
   text-align: center;
 `;
 
-const Products = ({ history, loading, error, products }) => {
-  const isEmpty = products.length === 0 ? 'No products available' : false;
+const Products = ({ history }) => (
+  <>
+    {history && (
+      <SubHeader
+        title='Available products'
+        goToCart={() => history.push('/cart')}
+      />
+    )}
+    <Query query={GET_LIMIT}>
+      {({ data }) => (
+        <>
+        <Filters limit={parseInt(data.limit)} />
+          <Query query={GET_PRODUCTS} variables={{
+            limit:
+              parseInt(data.limit)
+          }}>
+            {({ loading, error, data }) => {
+              if (loading || error) {
+                return <Alert>{loading ? 'Loading...' :
+                  error}</Alert>;
+              }
 
-  return (
-    <>
-      {history && (
-        <SubHeader
-          title='Available products'
-          goToCart={() => history.push('/cart')}
-        />
+              return (
+                <ProductItemsWrapper>
+                  {data.products &&
+                    data.products.map(product => (
+                      <ProductItem key={product.id} data={product} />
+                    ))}
+                </ProductItemsWrapper>
+              );
+            }}
+          </Query>
+        </>
       )}
-      {!loading && !error && !isEmpty ? (
-        <ProductItemsWrapper>
-          {products &&
-            products.map(product => (
-              <ProductItem key={product.id} data={product} />
-            ))}
-        </ProductItemsWrapper>
-      ) : (
-        <Alert>{loading ? 'Loading' : error || isEmpty}</Alert>
-      )}
-    </>
-  );
-};
+    </Query>
+  </>
 
-Products.defaultProps = {
-  loading: false,
-  error: '',
-  products: [],
-};
+);
+
+
 
 export default Products;
