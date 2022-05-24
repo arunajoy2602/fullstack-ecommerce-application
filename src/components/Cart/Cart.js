@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import SubHeader from '../Header/SubHeader';
 import ProductItem from '../Products/ProductItem';
 import Totals from './Totals';
+import { Link } from 'react-router-dom';
+import Button from '../Button/Button';
 import { Query } from 'react-apollo';
 import { GET_CART } from '../../constants';
 
@@ -43,6 +45,11 @@ const Cart = ({ history }) => (
               ))}
             </CartItemsWrapper>
             <Totals count={data.cart.total} />
+            {data.cart && data.cart.products.length > 0 && (
+              <Link to='/checkout'>
+                <Button color='blue'>Checkout</Button>
+              </Link>
+            )}
           </CartWrapper>
         );
       }}

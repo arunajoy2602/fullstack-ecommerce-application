@@ -1,8 +1,10 @@
 import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import Header from './Header/Header';
 import Products from './Products/Products';
+import Login from './Checkout/Login';
+import Checkout from './Checkout/Checkout';
 // import gql from 'graphql-tag';
 import Cart from './Cart/Cart';
 
@@ -14,17 +16,34 @@ import {
 } from "@apollo/client";
 import { HttpLink } from 'apollo-link-http';
 import { ApolloProvider } from 'react-apollo';
+import { setContext } from 'apollo-link-Context';
 
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql',
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = isAuthenticated;
+
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+
+
+const isAuthenticated = sessionStorage.getItem('token');
 const cache = new InMemoryCache();
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: 'http://localhost:4000/graphql',
-  }),
+  link: authLink.concat(httpLink),
   cache,
   resolvers: {
 
   },
-   typeDefs: `
+  typeDefs: `
    extend type Query {
    limit: Int!
    }
@@ -63,6 +82,15 @@ const App = () => (
       <Switch>
         <Route exact path='/' component={Products} />
         <Route path='/cart' component={Cart} />
+        <Route
+          path='/checkout'
+          render={props =>
+            isAuthenticated
+              ? <Checkout />
+              : <Redirect to='/login' />
+          }
+        />
+        <Route path='/login' component={Login} />
       </Switch>
     </AppWrapper>
   </ApolloProvider>
